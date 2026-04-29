@@ -63,6 +63,10 @@ def _build_empty_feed() -> etree._Element:
     add(channel, f"{{{ITUNES}}}author", PODCAST_AUTHOR)
     add(channel, f"{{{ITUNES}}}explicit", "false")
 
+    owner = etree.SubElement(channel, f"{{{ITUNES}}}owner")
+    add(owner, f"{{{ITUNES}}}name", PODCAST_AUTHOR)
+    add(owner, f"{{{ITUNES}}}email", "hiwatashi.hiromitsu@gmail.com")
+
     image = etree.SubElement(channel, f"{{{ITUNES}}}image")
     image.set("href", f"{FEED_BASE_URL}/cover.jpg")
 
