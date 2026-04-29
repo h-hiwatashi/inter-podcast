@@ -14,10 +14,10 @@
 
 ## フェーズ2: Google Cloud 設定
 
-- [ ] Google Cloud プロジェクト作成
-- [ ] Text-to-Speech API 有効化
-- [ ] サービスアカウント作成（ロール: Cloud Text-to-Speech API User）
-- [ ] サービスアカウントキー（JSON）のダウンロード
+- [x] Google Cloud プロジェクト作成
+- [x] Text-to-Speech API 有効化
+- [x] サービスアカウント作成（ロール: Cloud Text-to-Speech API User）
+- [x] サービスアカウントキー（JSON）のダウンロード
 
 ---
 
