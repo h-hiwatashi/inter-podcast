@@ -5,7 +5,7 @@
 - [x] GitHubリポジトリ作成 (`h-hiwatashi/inter-podcast`)
 - [x] プロジェクト初期ファイル作成・push
 - [x] `design.md` 作成・push
-- [ ] GitHub Pages 有効化（Settings > Pages > Branch: main / root）
+- [x] GitHub Pages 有効化（Settings > Pages > Branch: main / root）
 - [ ] GitHub Secrets 設定
   - [ ] `ANTHROPIC_API_KEY`
   - [ ] `GOOGLE_APPLICATION_CREDENTIALS_JSON`
