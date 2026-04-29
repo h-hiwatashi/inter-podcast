@@ -45,9 +45,9 @@
 
 ## フェーズ5: Spotify 登録
 
-- [ ] Spotify for Podcasters アカウント作成
-- [ ] GitHub Pages の feed.xml URL を確認（`https://h-hiwatashi.github.io/inter-podcast/feed.xml`）
-- [ ] Spotify for Podcasters に RSS URL でポッドキャスト登録
+- [x] Spotify for Podcasters アカウント作成
+- [x] GitHub Pages の feed.xml URL を確認（`https://h-hiwatashi.github.io/inter-podcast/feed.xml`）
+- [x] Spotify for Podcasters に RSS URL でポッドキャスト登録
 - [ ] Spotify 側でエピソードが表示されること確認
 
 ---
