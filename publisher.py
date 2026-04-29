@@ -1,5 +1,5 @@
 import os
-import json
+import tempfile
 from datetime import datetime, timezone
 from lxml import etree
 from github import Github
@@ -23,12 +23,18 @@ def upload_mp3_to_release(mp3_bytes: bytes, filename: str, episode_title: str) -
         message=f"Auto-generated podcast episode: {episode_title}",
     )
 
-    asset = release.upload_asset(
-        path=filename,
-        content_type="audio/mpeg",
-        name=filename,
-        data=mp3_bytes,
-    )
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+        tmp.write(mp3_bytes)
+        tmp_path = tmp.name
+
+    try:
+        asset = release.upload_asset(
+            path=tmp_path,
+            content_type="audio/mpeg",
+            name=filename,
+        )
+    finally:
+        os.unlink(tmp_path)
 
     return asset.browser_download_url
 

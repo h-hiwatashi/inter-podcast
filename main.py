@@ -1,7 +1,6 @@
 import json
 import os
 import sys
-import tempfile
 from datetime import datetime
 
 from config import PROCESSED_URLS_FILE
@@ -47,18 +46,9 @@ def main() -> None:
     filename = f"episode_{now.strftime('%Y%m%d_%H%M')}.mp3"
     episode_title = f"インテルミラノニュース {now.strftime('%Y/%m/%d %H:%M')} UTC"
 
-    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
-        tmp.write(mp3_bytes)
-        tmp_path = tmp.name
-
-    try:
-        os.rename(tmp_path, filename)
-        print(f"Uploading {filename} to GitHub Releases...")
-        mp3_url = upload_mp3_to_release(mp3_bytes, filename, episode_title)
-        print(f"Uploaded: {mp3_url}")
-    finally:
-        if os.path.exists(filename):
-            os.remove(filename)
+    print(f"Uploading {filename} to GitHub Releases...")
+    mp3_url = upload_mp3_to_release(mp3_bytes, filename, episode_title)
+    print(f"Uploaded: {mp3_url}")
 
     print("Updating feed.xml...")
     update_feed(mp3_url, filename, episode_title)
