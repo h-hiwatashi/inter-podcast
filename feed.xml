@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+  <channel>
+    <title>インテルミラノ ニュース速報</title>
+    <description>イタリアのインテルミラノ最新ニュースを日本語でお届けするポッドキャストです。</description>
+    <language>ja</language>
+    <link>https://h-hiwatashi.github.io/inter-podcast</link>
+    <itunes:author>Inter Podcast Bot</itunes:author>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:image href="https://h-hiwatashi.github.io/inter-podcast/cover.jpg"/>
+  <item><title>インテルミラノニュース 2026/04/29 12:36 UTC</title><pubDate>Wed, 29 Apr 2026 12:36:05 +0000</pubDate><itunes:duration>300</itunes:duration><guid isPermaLink="false">https://github.com/h-hiwatashi/inter-podcast/releases/download/episode-episode_20260429_1236/episode_20260429_1236.mp3</guid><enclosure url="https://github.com/h-hiwatashi/inter-podcast/releases/download/episode-episode_20260429_1236/episode_20260429_1236.mp3" type="audio/mpeg" length="0"/></item></channel>
+</rss>
