@@ -23,23 +23,23 @@
 
 ## フェーズ3: ローカル動作確認
 
-- [ ] Python 仮想環境作成・依存パッケージインストール (`pip install -r requirements.txt`)
-- [ ] 環境変数設定（`ANTHROPIC_API_KEY`, `GOOGLE_APPLICATION_CREDENTIALS`, `GITHUB_TOKEN`, `GITHUB_REPOSITORY`）
-- [ ] `fetcher.py` 単体確認（RSS取得・記事表示）
-- [ ] `translator.py` 単体確認（台本生成・内容確認）
-- [ ] `tts.py` 単体確認（MP3ファイル生成・再生確認）
-- [ ] `publisher.py` 単体確認（GitHub Release作成・feed.xml 更新）
-- [ ] `main.py` 通し実行（全工程エンドツーエンド確認）
+- [x] Python 仮想環境作成・依存パッケージインストール (`pip install -r requirements.txt`)
+- [x] 環境変数設定（`ANTHROPIC_API_KEY`, `GOOGLE_APPLICATION_CREDENTIALS`, `GITHUB_TOKEN`, `GITHUB_REPOSITORY`）
+- [x] `fetcher.py` 単体確認（RSS取得・記事表示）
+- [x] `translator.py` 単体確認（台本生成・内容確認）
+- [x] `tts.py` 単体確認（MP3ファイル生成・再生確認）
+- [x] `publisher.py` 単体確認（GitHub Release作成・feed.xml 更新）
+- [x] `main.py` 通し実行（全工程エンドツーエンド確認）
 
 ---
 
 ## フェーズ4: GitHub Actions 確認
 
-- [ ] `workflow_dispatch` で手動トリガー実行
-- [ ] Actions ログでエラーがないこと確認
-- [ ] GitHub Releases に MP3 がアップロードされていること確認
-- [ ] `feed.xml` が更新されてpushされていること確認
-- [ ] `processed_urls.json` が更新されてpushされていること確認
+- [x] `workflow_dispatch` で手動トリガー実行
+- [x] Actions ログでエラーがないこと確認
+- [x] GitHub Releases に MP3 がアップロードされていること確認
+- [x] `feed.xml` が更新されてpushされていること確認
+- [x] `processed_urls.json` が更新されてpushされていること確認
 
 ---
 
