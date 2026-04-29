@@ -26,21 +26,36 @@ URL: {article['url']}
 - 音声読み上げ用なので記号や箇条書きは使わない
 - 全体で6〜8分程度（約2000〜2500文字）に収める
 - 以下の選手名・監督名は必ず指定の読み仮名カタカナで表記すること:
-  Lautaro Martinez → ラウタロ・マルティネス
-  Nicolás Barella → ニコロ・バレッラ
+  【監督】
+  Cristian Chivu → クリスティアン・キブ
+  【GK】
+  Yann Sommer → ヤン・ゾマー
+  Josep Martínez Riera → ジョゼップ・マルティネス
+  Raffaele Di Gennaro → ラッファエーレ・ディ・ジェンナーロ
+  Alessandro Calligaris → アレッサンドロ・カッリガリス
+  【DF】
+  Alessandro Bastoni → アレッサンドロ・バストーニ
+  Stefan de Vrij → ステファン・デ・フライ
+  Francesco Acerbi → フランチェスコ・アチェルビ
+  Carlos Augusto → カルロス・アウグスト
+  Manuel Akanji → マニュエル・アカンジ
+  Yann Bisseck → ヤン・ビセック
+  Federico Dimarco → フェデリコ・ディマルコ
+  Denzel Dumfries → デンゼル・ダンフリース
+  【MF】
   Nicolò Barella → ニコロ・バレッラ
   Hakan Çalhanoğlu → ハカン・チャルハノール
-  Marcus Thuram → マルクス・テュラム
-  Yann Sommer → ヤン・ゾマー
-  Alessandro Bastoni → アレッサンドロ・バストーニ
-  Benjamin Pavard → バンジャマン・パバール
   Henrikh Mkhitaryan → ヘンリク・ムヒタリャン
-  Federico Dimarco → フェデリコ・ディマルコ
-  Mehdi Taremi → メフディ・タレミ
-  Piotr Zieliński → ピオトル・ジエリンスキ
-  Simone Inzaghi → シモーネ・インザーギ
-  Davide Frattesi → ダビデ・フラッテージ
-  Stefan de Vrij → ステファン・デ・フライ
+  Davide Frattesi → ダヴィデ・フラッテージ
+  Piotr Zieliński → ピョトル・ジエリンスキ
+  Andy Diouf → アンディ・ジウフ
+  Petar Sučić → ペタル・スチッチ
+  【FW】
+  Lautaro Martínez → ラウタロ・マルティネス
+  Marcus Thuram → マルクス・テュラム
+  Francesco Pio Esposito → フランチェスコ・ピオ・エスポジト
+  Ange-Yoan Bonny → アンジュ＝ヨアン・ボニー
+  Luis Henrique → ルイス・エンリケ
 
 ニュース記事:
 {articles_text}
