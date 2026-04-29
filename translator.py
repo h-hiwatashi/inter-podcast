@@ -24,7 +24,23 @@ URL: {article['url']}
 - 末尾は「以上、インテルミラノニュース速報でした。」で締める
 - 固有名詞（選手名・チーム名）はカタカナ表記
 - 音声読み上げ用なので記号や箇条書きは使わない
-- 全体で3〜5分程度（約1000〜1500文字）に収める
+- 全体で6〜8分程度（約2000〜2500文字）に収める
+- 以下の選手名・監督名は必ず指定の読み仮名カタカナで表記すること:
+  Lautaro Martinez → ラウタロ・マルティネス
+  Nicolás Barella → ニコロ・バレッラ
+  Nicolò Barella → ニコロ・バレッラ
+  Hakan Çalhanoğlu → ハカン・チャルハノール
+  Marcus Thuram → マルクス・テュラム
+  Yann Sommer → ヤン・ゾマー
+  Alessandro Bastoni → アレッサンドロ・バストーニ
+  Benjamin Pavard → バンジャマン・パバール
+  Henrikh Mkhitaryan → ヘンリク・ムヒタリャン
+  Federico Dimarco → フェデリコ・ディマルコ
+  Mehdi Taremi → メフディ・タレミ
+  Piotr Zieliński → ピオトル・ジエリンスキ
+  Simone Inzaghi → シモーネ・インザーギ
+  Davide Frattesi → ダビデ・フラッテージ
+  Stefan de Vrij → ステファン・デ・フライ
 
 ニュース記事:
 {articles_text}
