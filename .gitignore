@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+/tmp/
+*.mp3
+.DS_Store
+/venv/
+/.venv/
+gcp-key.json
