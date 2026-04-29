@@ -6,9 +6,9 @@
 - [x] プロジェクト初期ファイル作成・push
 - [x] `design.md` 作成・push
 - [x] GitHub Pages 有効化（Settings > Pages > Branch: main / root）
-- [ ] GitHub Secrets 設定
-  - [ ] `ANTHROPIC_API_KEY`
-  - [ ] `GOOGLE_APPLICATION_CREDENTIALS_JSON`
+- [x] GitHub Secrets 設定
+  - [x] `ANTHROPIC_API_KEY`
+  - [x] `GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
 ---
 
