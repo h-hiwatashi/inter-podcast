@@ -51,7 +51,7 @@ def main() -> None:
     print(f"Uploaded: {mp3_url}")
 
     print("Updating feed.xml...")
-    update_feed(mp3_url, filename, episode_title)
+    update_feed(mp3_url, filename, episode_title, mp3_size=len(mp3_bytes))
 
     print("Saving processed URLs...")
     save_processed_urls([a["url"] for a in articles])

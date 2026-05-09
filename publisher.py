@@ -70,10 +70,13 @@ def _build_empty_feed() -> etree._Element:
     image = etree.SubElement(channel, f"{{{ITUNES}}}image")
     image.set("href", f"{FEED_BASE_URL}/cover.jpg")
 
+    category = etree.SubElement(channel, f"{{{ITUNES}}}category")
+    category.set("text", "Sports")
+
     return rss
 
 
-def update_feed(mp3_url: str, filename: str, episode_title: str, duration_hint: int = 300) -> None:
+def update_feed(mp3_url: str, filename: str, episode_title: str, mp3_size: int = 0, duration_hint: int = 300) -> None:
     ITUNES = "http://www.itunes.com/dtds/podcast-1.0.dtd"
 
     if os.path.exists(FEED_FILE):
@@ -104,7 +107,7 @@ def update_feed(mp3_url: str, filename: str, episode_title: str, duration_hint: 
     enclosure = etree.SubElement(item, "enclosure")
     enclosure.set("url", mp3_url)
     enclosure.set("type", "audio/mpeg")
-    enclosure.set("length", "0")
+    enclosure.set("length", str(mp3_size))
 
     # Insert as first item (newest first)
     first_item = channel.find("item")
