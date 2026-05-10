@@ -3,7 +3,6 @@ name: Generate Podcast Episode
 on:
   schedule:
     - cron: '0 21 * * *'   # JST 朝6時
-    - cron: '0 9 * * *'    # JST 夕18時
   workflow_dispatch:
 
 permissions:
