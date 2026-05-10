@@ -41,7 +41,7 @@ def text_to_mp3(script: str) -> bytes:
 
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
-        speaking_rate=1.2,
+        speaking_rate=1.0,
         pitch=0.0,
     )
 

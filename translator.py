@@ -24,7 +24,7 @@ URL: {article['url']}
 - 末尾は「以上、インテルミラノニュース速報でした。」で締める
 - 固有名詞（選手名・チーム名）はカタカナ表記
 - 音声読み上げ用なので記号や箇条書きは使わない
-- 全体で6〜8分程度（約2000〜2500文字）に収める
+- 全体で10分程度（約3500〜4500文字）に収める
 - 以下の選手名・監督名は必ず指定の読み仮名カタカナで表記すること:
   【監督】
   Cristian Chivu → クリスティアン・キブ
@@ -64,7 +64,7 @@ URL: {article['url']}
 
     message = client.messages.create(
         model=CLAUDE_MODEL,
-        max_tokens=2048,
+        max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
 
