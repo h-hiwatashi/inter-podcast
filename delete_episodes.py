@@ -2,10 +2,15 @@
 削除したいエピソードを番号で選択して削除するスクリプト。
 GitHub Release（MP3）と feed.xml の両方から削除します。
 
-使い方:
+ローカル対話モード:
   python delete_episodes.py
+
+CIモード（番号指定）:
+  python delete_episodes.py --list
+  python delete_episodes.py --delete 1,3,5
 """
 
+import argparse
 import os
 import subprocess
 from lxml import etree
@@ -23,18 +28,25 @@ def get_releases(repo):
     return releases
 
 
-def select_episodes(releases):
-    print("\n削除するエピソードを選択してください（複数の場合はカンマ区切り例: 1,3,5）\n")
+def print_list(releases):
+    print("\n# エピソード一覧\n")
     for i, item in enumerate(releases, 1):
         r = item["release"]
         size = f"{item['mp3'].size // 1024}KB" if item["mp3"] else "asset不明"
         print(f"  {i:2}. {r.title}  [{size}]")
-
     print()
+
+
+def select_by_input(releases):
+    print_list(releases)
+    print("削除するエピソードを選択してください（複数の場合はカンマ区切り例: 1,3,5）\n")
     raw = input("番号を入力 (Enterでキャンセル): ").strip()
     if not raw:
         return []
+    return parse_numbers(raw, releases)
 
+
+def parse_numbers(raw: str, releases: list) -> list:
     selected = []
     for part in raw.split(","):
         part = part.strip()
@@ -77,25 +89,7 @@ def delete_release_and_tag(repo, release):
         pass
 
 
-def main():
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(GITHUB_REPO)
-
-    print("エピソード一覧を取得中...")
-    releases = get_releases(repo)
-    if not releases:
-        print("エピソードが見つかりません。")
-        return
-
-    selected = select_episodes(releases)
-    if not selected:
-        print("キャンセルしました。")
-        return
-
-    if not confirm(selected):
-        print("キャンセルしました。")
-        return
-
+def do_delete(selected, repo):
     mp3_urls = set()
     for item in selected:
         r = item["release"]
@@ -113,6 +107,47 @@ def main():
     subprocess.run(["git", "push"], check=True)
 
     print(f"\n完了: {len(selected)} 件削除しました。")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--list", action="store_true", help="エピソード一覧を表示して終了")
+    parser.add_argument("--delete", metavar="NUMBERS", help="削除する番号（カンマ区切り例: 1,3,5）")
+    args = parser.parse_args()
+
+    g = Github(GITHUB_TOKEN)
+    repo = g.get_repo(GITHUB_REPO)
+
+    print("エピソード一覧を取得中...")
+    releases = get_releases(repo)
+    if not releases:
+        print("エピソードが見つかりません。")
+        return
+
+    if args.list:
+        print_list(releases)
+        return
+
+    if args.delete:
+        selected = parse_numbers(args.delete, releases)
+        if not selected:
+            print("有効な番号が見つかりません。")
+            return
+        print("\n以下のエピソードを削除します:\n")
+        for item in selected:
+            print(f"  - {item['release'].title}")
+        do_delete(selected, repo)
+        return
+
+    # 対話モード
+    selected = select_by_input(releases)
+    if not selected:
+        print("キャンセルしました。")
+        return
+    if not confirm(selected):
+        print("キャンセルしました。")
+        return
+    do_delete(selected, repo)
 
 
 if __name__ == "__main__":
