@@ -1,26 +1,33 @@
 """
-削除したいエピソードを番号で選択して削除するスクリプト。
-GitHub Release（MP3）と feed.xml の両方から削除します。
+エピソードの削除・非公開・再公開を行うスクリプト。
 
 ローカル対話モード:
   python delete_episodes.py
 
-CIモード（番号指定）:
+CIモード:
   python delete_episodes.py --list
+  python delete_episodes.py --list-hidden
   python delete_episodes.py --delete 1,3,5
+  python delete_episodes.py --hide 1,3,5
+  python delete_episodes.py --show 1,3,5
 """
 
 import argparse
 import os
 import subprocess
+from datetime import timezone
 from lxml import etree
 from github import Github
 from config import GITHUB_REPO, GITHUB_TOKEN, FEED_FILE
 
+ITUNES = "http://www.itunes.com/dtds/podcast-1.0.dtd"
 
-def get_releases(repo):
+
+def get_releases(repo, draft=False):
     releases = []
     for r in repo.get_releases():
+        if r.draft != draft:
+            continue
         assets = list(r.get_assets())
         mp3 = next((a for a in assets if a.name.endswith(".mp3")), None)
         releases.append({"release": r, "mp3": mp3})
@@ -28,22 +35,16 @@ def get_releases(repo):
     return releases
 
 
-def print_list(releases):
-    print("\n# エピソード一覧\n")
+def print_list(releases, label="公開中"):
+    print(f"\n# エピソード一覧（{label}）\n")
+    if not releases:
+        print("  （なし）\n")
+        return
     for i, item in enumerate(releases, 1):
         r = item["release"]
         size = f"{item['mp3'].size // 1024}KB" if item["mp3"] else "asset不明"
         print(f"  {i:2}. {r.title}  [{size}]")
     print()
-
-
-def select_by_input(releases):
-    print_list(releases)
-    print("削除するエピソードを選択してください（複数の場合はカンマ区切り例: 1,3,5）\n")
-    raw = input("番号を入力 (Enterでキャンセル): ").strip()
-    if not raw:
-        return []
-    return parse_numbers(raw, releases)
 
 
 def parse_numbers(raw: str, releases: list) -> list:
@@ -57,8 +58,16 @@ def parse_numbers(raw: str, releases: list) -> list:
     return selected
 
 
-def confirm(selected):
-    print("\n以下のエピソードを削除します:\n")
+def select_by_input(releases, prompt):
+    print_list(releases)
+    raw = input(f"{prompt}（カンマ区切り例: 1,3,5 / Enterでキャンセル）: ").strip()
+    if not raw:
+        return []
+    return parse_numbers(raw, releases)
+
+
+def confirm(selected, action_label):
+    print(f"\n以下のエピソードを{action_label}します:\n")
     for item in selected:
         print(f"  - {item['release'].title}")
     print()
@@ -66,12 +75,13 @@ def confirm(selected):
     return ans == "y"
 
 
+# --- feed.xml 操作 ---
+
 def remove_from_feed(mp3_urls: set):
     if not os.path.exists(FEED_FILE):
         return
     tree = etree.parse(FEED_FILE)
-    rss = tree.getroot()
-    channel = rss.find("channel")
+    channel = tree.getroot().find("channel")
     for item in list(channel.findall("item")):
         enc = item.find("enclosure")
         if enc is not None and enc.get("url") in mp3_urls:
@@ -79,75 +89,207 @@ def remove_from_feed(mp3_urls: set):
     tree.write(FEED_FILE, pretty_print=True, xml_declaration=True, encoding="UTF-8")
 
 
+def add_to_feed(episodes: list):
+    """episodes: list of {"release": r, "mp3": asset} を新しい順にfeed.xmlへ挿入"""
+    if not os.path.exists(FEED_FILE):
+        return
+    tree = etree.parse(FEED_FILE)
+    channel = tree.getroot().find("channel")
+
+    for ep in episodes:
+        r = ep["release"]
+        mp3 = ep["mp3"]
+        if not mp3:
+            continue
+
+        url = mp3.browser_download_url
+        size = mp3.size
+        pub_date = r.created_at.astimezone(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")
+
+        # 既に同じURLのitemがあればスキップ
+        existing_urls = {
+            item.find("enclosure").get("url")
+            for item in channel.findall("item")
+            if item.find("enclosure") is not None
+        }
+        if url in existing_urls:
+            continue
+
+        item = etree.Element("item")
+        _add(item, "title", r.title)
+        _add(item, "pubDate", pub_date)
+        _add(item, f"{{{ITUNES}}}duration", "300")
+        guid = etree.SubElement(item, "guid")
+        guid.text = url
+        guid.set("isPermaLink", "false")
+        enc = etree.SubElement(item, "enclosure")
+        enc.set("url", url)
+        enc.set("type", "audio/mpeg")
+        enc.set("length", str(size))
+
+        # 日付順を保って挿入
+        inserted = False
+        for existing in channel.findall("item"):
+            existing_date = existing.findtext("pubDate", "")
+            if pub_date >= existing_date:
+                channel.insert(list(channel).index(existing), item)
+                inserted = True
+                break
+        if not inserted:
+            channel.append(item)
+
+    tree.write(FEED_FILE, pretty_print=True, xml_declaration=True, encoding="UTF-8")
+
+
+def _add(parent, tag, text):
+    el = etree.SubElement(parent, tag)
+    el.text = text
+    return el
+
+
+# --- GitHub Release 操作 ---
+
 def delete_release_and_tag(repo, release):
     tag_name = release.tag_name
     release.delete_release()
     try:
-        ref = repo.get_git_ref(f"tags/{tag_name}")
-        ref.delete()
+        repo.get_git_ref(f"tags/{tag_name}").delete()
     except Exception:
         pass
 
 
+def set_draft(release, draft: bool):
+    release.update_release(
+        name=release.title,
+        message=release.body or "",
+        draft=draft,
+    )
+
+
+# --- アクション ---
+
 def do_delete(selected, repo):
-    mp3_urls = set()
+    mp3_urls = {item["mp3"].browser_download_url for item in selected if item["mp3"]}
     for item in selected:
-        r = item["release"]
-        print(f"削除中: {r.title}")
-        if item["mp3"]:
-            mp3_urls.add(item["mp3"].browser_download_url)
-        delete_release_and_tag(repo, r)
+        print(f"削除中: {item['release'].title}")
+        delete_release_and_tag(repo, item["release"])
+    _update_feed_and_push(lambda: remove_from_feed(mp3_urls), len(selected), "Remove")
 
+
+def do_hide(selected, repo):
+    mp3_urls = {item["mp3"].browser_download_url for item in selected if item["mp3"]}
+    for item in selected:
+        print(f"非公開: {item['release'].title}")
+        set_draft(item["release"], draft=True)
+    _update_feed_and_push(lambda: remove_from_feed(mp3_urls), len(selected), "Hide")
+
+
+def do_show(selected, repo):
+    for item in selected:
+        print(f"再公開: {item['release'].title}")
+        set_draft(item["release"], draft=False)
+    _update_feed_and_push(lambda: add_to_feed(selected), len(selected), "Show")
+
+
+def _update_feed_and_push(feed_fn, count, verb):
     print("feed.xml を更新中...")
-    remove_from_feed(mp3_urls)
-
-    print("git commit & push 中...")
+    feed_fn()
     subprocess.run(["git", "add", FEED_FILE], check=True)
-    subprocess.run(["git", "commit", "-m", f"Remove {len(selected)} episode(s)"], check=True)
-    subprocess.run(["git", "push"], check=True)
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--quiet"],
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        subprocess.run(["git", "commit", "-m", f"{verb} {count} episode(s)"], check=True)
+        subprocess.run(["git", "push"], check=True)
+    print(f"\n完了: {count} 件処理しました。")
 
-    print(f"\n完了: {len(selected)} 件削除しました。")
 
+# --- メイン ---
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--list", action="store_true", help="エピソード一覧を表示して終了")
-    parser.add_argument("--delete", metavar="NUMBERS", help="削除する番号（カンマ区切り例: 1,3,5）")
+    parser.add_argument("--list", action="store_true")
+    parser.add_argument("--list-hidden", action="store_true")
+    parser.add_argument("--delete", metavar="NUMBERS")
+    parser.add_argument("--hide", metavar="NUMBERS")
+    parser.add_argument("--show", metavar="NUMBERS")
     args = parser.parse_args()
 
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(GITHUB_REPO)
 
-    print("エピソード一覧を取得中...")
-    releases = get_releases(repo)
-    if not releases:
-        print("エピソードが見つかりません。")
+    if args.list:
+        print("公開中エピソードを取得中...")
+        print_list(get_releases(repo, draft=False), "公開中")
         return
 
-    if args.list:
-        print_list(releases)
+    if args.list_hidden:
+        print("非公開エピソードを取得中...")
+        print_list(get_releases(repo, draft=True), "非公開")
         return
 
     if args.delete:
+        releases = get_releases(repo, draft=False)
         selected = parse_numbers(args.delete, releases)
         if not selected:
             print("有効な番号が見つかりません。")
             return
-        print("\n以下のエピソードを削除します:\n")
         for item in selected:
-            print(f"  - {item['release'].title}")
+            print(f"削除対象: {item['release'].title}")
         do_delete(selected, repo)
         return
 
+    if args.hide:
+        releases = get_releases(repo, draft=False)
+        selected = parse_numbers(args.hide, releases)
+        if not selected:
+            print("有効な番号が見つかりません。")
+            return
+        for item in selected:
+            print(f"非公開対象: {item['release'].title}")
+        do_hide(selected, repo)
+        return
+
+    if args.show:
+        releases = get_releases(repo, draft=True)
+        selected = parse_numbers(args.show, releases)
+        if not selected:
+            print("有効な番号が見つかりません。")
+            return
+        for item in selected:
+            print(f"再公開対象: {item['release'].title}")
+        do_show(selected, repo)
+        return
+
     # 対話モード
-    selected = select_by_input(releases)
-    if not selected:
-        print("キャンセルしました。")
+    print("エピソード一覧を取得中...")
+    releases = get_releases(repo, draft=False)
+    if not releases:
+        print("公開中のエピソードが見つかりません。")
         return
-    if not confirm(selected):
+
+    print("\n操作を選んでください: 1=削除  2=非公開  3=再公開（非公開から）\n")
+    op = input("操作番号: ").strip()
+
+    if op == "1":
+        selected = select_by_input(releases, "削除する番号を入力")
+        if selected and confirm(selected, "削除"):
+            do_delete(selected, repo)
+    elif op == "2":
+        selected = select_by_input(releases, "非公開にする番号を入力")
+        if selected and confirm(selected, "非公開に"):
+            do_hide(selected, repo)
+    elif op == "3":
+        hidden = get_releases(repo, draft=True)
+        if not hidden:
+            print("非公開のエピソードがありません。")
+            return
+        selected = select_by_input(hidden, "再公開する番号を入力")
+        if selected and confirm(selected, "再公開"):
+            do_show(selected, repo)
+    else:
         print("キャンセルしました。")
-        return
-    do_delete(selected, repo)
 
 
 if __name__ == "__main__":

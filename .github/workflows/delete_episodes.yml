@@ -1,18 +1,21 @@
-name: Delete Episodes
+name: Manage Episodes
 
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'list: 一覧表示 / delete: 削除実行'
+        description: 'list: 公開一覧 / list-hidden: 非公開一覧 / delete: 削除 / hide: 非公開 / show: 再公開'
         required: true
         default: 'list'
         type: choice
         options:
           - list
+          - list-hidden
           - delete
+          - hide
+          - show
       episodes:
-        description: '削除する番号（カンマ区切り例: 1,3,5）。listの場合は不要'
+        description: '対象番号（カンマ区切り例: 1,3,5）。list / list-hidden の場合は不要'
         required: false
         default: ''
 
@@ -40,12 +43,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: List episodes
+      - name: List public episodes
         if: ${{ inputs.action == 'list' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python delete_episodes.py --list
+
+      - name: List hidden episodes
+        if: ${{ inputs.action == 'list-hidden' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python delete_episodes.py --list-hidden
 
       - name: Delete episodes
         if: ${{ inputs.action == 'delete' }}
@@ -53,3 +63,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python delete_episodes.py --delete "${{ inputs.episodes }}"
+
+      - name: Hide episodes
+        if: ${{ inputs.action == 'hide' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python delete_episodes.py --hide "${{ inputs.episodes }}"
+
+      - name: Show episodes
+        if: ${{ inputs.action == 'show' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python delete_episodes.py --show "${{ inputs.episodes }}"
